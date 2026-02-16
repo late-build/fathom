@@ -85,6 +85,7 @@ class TokenState:
 @dataclass(frozen=True)
 class GraduationEvent(Event):
     """Emitted when a token graduates from pump.fun to a DEX pool."""
+    event_type: EventType = EventType.SIGNAL
     mint: str = ""
     symbol: str = ""
     pool_address: str = ""
@@ -93,34 +94,27 @@ class GraduationEvent(Event):
     holder_count: int = 0
     creator: str = ""
     initial_price_usd: float = 0.0
-    
-    def __post_init__(self):
-        object.__setattr__(self, "event_type", EventType.SIGNAL)
 
 
 @dataclass(frozen=True)
 class BondingProgressEvent(Event):
     """Emitted when a token's bonding curve makes significant progress."""
+    event_type: EventType = EventType.SIGNAL
     mint: str = ""
     symbol: str = ""
     progress_pct: float = 0.0
     sol_raised: float = 0.0
     holder_count: int = 0
-    
-    def __post_init__(self):
-        object.__setattr__(self, "event_type", EventType.SIGNAL)
 
 
 @dataclass(frozen=True)
 class DevActivityEvent(Event):
     """Emitted when the dev wallet makes a significant move post-graduation."""
+    event_type: EventType = EventType.SIGNAL
     mint: str = ""
     symbol: str = ""
     action: str = ""         # "sell", "transfer", "add_liquidity"
     amount_pct: float = 0.0  # % of supply involved
-    
-    def __post_init__(self):
-        object.__setattr__(self, "event_type", EventType.SIGNAL)
 
 
 class GraduationMonitor(BaseDataFeed):

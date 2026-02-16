@@ -67,19 +67,17 @@ class Event:
 @dataclass(frozen=True)
 class PriceUpdate(Event):
     """Real-time price update for a token pair."""
+    event_type: EventType = EventType.PRICE_UPDATE
     token: str = ""
     price_usd: float = 0.0
     volume_24h: float = 0.0
     liquidity: float = 0.0
-    
-    def __post_init__(self):
-        if not self.event_type:
-            object.__setattr__(self, "event_type", EventType.PRICE_UPDATE)
 
 
 @dataclass(frozen=True)
 class Trade(Event):
     """A completed swap/trade on a DEX."""
+    event_type: EventType = EventType.TRADE
     token_in: str = ""
     token_out: str = ""
     amount_in: float = 0.0
@@ -87,10 +85,6 @@ class Trade(Event):
     price: float = 0.0
     pool: str = ""
     tx_signature: str = ""
-    
-    def __post_init__(self):
-        if not self.event_type:
-            object.__setattr__(self, "event_type", EventType.TRADE)
 
 
 @dataclass(frozen=True)

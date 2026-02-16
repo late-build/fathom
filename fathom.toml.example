@@ -1,0 +1,38 @@
+# Fathom configuration
+# Copy to fathom.toml and fill in your values.
+# Env vars override: FATHOM_RPC_URL, FATHOM_HELIUS_API_KEY, etc.
+
+[connection]
+rpc_url = "https://mainnet.helius-rpc.com/?api-key=YOUR_KEY"
+helius_api_key = "YOUR_HELIUS_KEY"
+wallet_path = ""  # path to Solana keypair JSON (empty = paper only)
+
+[execution]
+slippage_bps = 300        # 3% slippage tolerance
+use_jito = true           # MEV protection via Jito bundles
+jito_tip_lamports = 100000  # 0.0001 SOL tip
+priority_fee_lamports = 50000
+
+[graduation]
+grad_min_holders = 100    # skip tokens with < N holders
+grad_min_sol = 50.0       # skip tokens that raised < N SOL
+grad_min_progress = 70.0  # start tracking at N% bonding curve
+track_dev_wallets = true
+poll_interval_ms = 2000
+
+[strategy]
+position_size_usd = 50.0
+max_positions = 3
+take_profit_pct = 0.50    # 50% TP
+stop_loss_pct = 0.20      # 20% SL
+trailing_stop_pct = 0.15  # 15% trailing stop
+trailing_activate_pct = 0.30  # activate after 30% gain
+max_hold_seconds = 300.0  # 5 min max hold
+exit_on_dev_sell = true
+max_initial_mcap = 500000.0  # skip tokens > $500K mcap
+
+[paper]
+paper_balance_usd = 1000.0
+
+[feeds]
+watch_tokens = ["SOL", "BONK"]
