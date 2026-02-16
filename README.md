@@ -1,5 +1,9 @@
 # ⚓ fathom
 
+<p align="center">
+  <img src="assets/banner.svg" alt="fathom — solana memecoin trading engine" width="100%"/>
+</p>
+
 [![Python](https://img.shields.io/badge/python-3.9+-3776ab?logo=python&logoColor=white)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Solana](https://img.shields.io/badge/chain-Solana-9945ff?logo=solana&logoColor=white)](https://solana.com)
@@ -60,45 +64,17 @@ Source: [late-build/fathom-site](https://github.com/late-build/fathom-site)
 
 ## Architecture
 
-```
-┌─────────────────────┐
-│   7 Data Sources     │  DexScreener · Pump.fun · GeckoTerminal
-│   Discovery Layer    │  143+ mints per scan cycle
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│   DexScreener       │  Batch enrichment: price, volume, liquidity, mcap
-│   Batch API         │  30 tokens/call, adaptive backoff on 429
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│   Solana RPC        │  getTokenLargestAccounts + getTokenSupply
-│   Holder Intel      │  Top 10 concentration %, deployer, supply
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│   EventBus          │  Typed events with nanosecond timestamps
-│                     │  GraduationEvent → PriceUpdate → DevActivity
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│   Strategy Engine    │  GraduationSniper: mcap + concentration + trailing
-│                     │  Momentum: lookback window + entry threshold
-└──────────┬──────────┘
-           │
-      ┌────┴────┐
-      ▼         ▼
-┌─────────┐ ┌─────────┐
-│  Paper  │ │  Live   │  Jupiter v6 / PumpSwap direct
-│  Trade  │ │  Trade  │  (signing via solders — WIP)
-└─────────┘ └─────────┘
-```
+<img src="assets/architecture.svg" alt="Fathom Architecture" width="100%"/>
 
 **Core loop**: Data sources emit typed events → EventBus routes to subscribers → strategies evaluate and submit orders → adapters execute or simulate.
+
+### Pipeline
+
+<img src="assets/pipeline.svg" alt="Fathom Pipeline" width="100%"/>
+
+### Scoring Model
+
+<img src="assets/scoring.svg" alt="Multi-Factor Scoring Model" width="100%"/>
 
 ## Quick Start
 

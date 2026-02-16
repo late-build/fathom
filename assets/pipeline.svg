@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 200" width="900" height="200">
+  <style>
+    text { font-family: 'JetBrains Mono', 'SF Mono', monospace; }
+    .step { font-size: 12px; fill: #d4d4d8; font-weight: 500; }
+    .detail { font-size: 9px; fill: #71717a; }
+    .num { font-size: 22px; fill: #34d399; opacity: 0.3; font-weight: 700; }
+  </style>
+
+  <rect width="900" height="200" fill="#0a0a0b" rx="8"/>
+
+  <!-- Step boxes -->
+  <g>
+    <!-- Discover -->
+    <rect x="20" y="40" width="150" height="120" rx="6" fill="#18181b" stroke="#27272a"/>
+    <text x="95" y="30" text-anchor="middle" class="num">01</text>
+    <text x="95" y="75" text-anchor="middle" class="step">Discover</text>
+    <text x="95" y="95" text-anchor="middle" class="detail">7 sources</text>
+    <text x="95" y="110" text-anchor="middle" class="detail">143+ mints</text>
+    <text x="95" y="125" text-anchor="middle" class="detail">4h collection</text>
+    <text x="95" y="145" text-anchor="middle" class="detail" fill="#34d399" opacity="0.5">automated cron</text>
+
+    <!-- Arrow -->
+    <line x1="175" y1="100" x2="195" y2="100" stroke="#3f3f46" stroke-width="1.5"/>
+    <polygon points="195,96 203,100 195,104" fill="#3f3f46"/>
+
+    <!-- Enrich -->
+    <rect x="208" y="40" width="150" height="120" rx="6" fill="#18181b" stroke="#27272a"/>
+    <text x="283" y="30" text-anchor="middle" class="num">02</text>
+    <text x="283" y="75" text-anchor="middle" class="step">Enrich</text>
+    <text x="283" y="95" text-anchor="middle" class="detail">DexScreener batch</text>
+    <text x="283" y="110" text-anchor="middle" class="detail">price + volume</text>
+    <text x="283" y="125" text-anchor="middle" class="detail">mcap + liquidity</text>
+    <text x="283" y="145" text-anchor="middle" class="detail" fill="#34d399" opacity="0.5">30 tokens/call</text>
+
+    <line x1="363" y1="100" x2="383" y2="100" stroke="#3f3f46" stroke-width="1.5"/>
+    <polygon points="383,96 391,100 383,104" fill="#3f3f46"/>
+
+    <!-- Verify -->
+    <rect x="396" y="40" width="150" height="120" rx="6" fill="#18181b" stroke="#27272a"/>
+    <text x="471" y="30" text-anchor="middle" class="num">03</text>
+    <text x="471" y="75" text-anchor="middle" class="step">Verify</text>
+    <text x="471" y="95" text-anchor="middle" class="detail">Solana RPC</text>
+    <text x="471" y="110" text-anchor="middle" class="detail">holder analysis</text>
+    <text x="471" y="125" text-anchor="middle" class="detail">dev wallet track</text>
+    <text x="471" y="145" text-anchor="middle" class="detail" fill="#f87171" opacity="0.5">scam detection</text>
+
+    <line x1="551" y1="100" x2="571" y2="100" stroke="#3f3f46" stroke-width="1.5"/>
+    <polygon points="571,96 579,100 571,104" fill="#3f3f46"/>
+
+    <!-- Score -->
+    <rect x="584" y="40" width="150" height="120" rx="6" fill="#18181b" stroke="#34d399" stroke-opacity="0.3"/>
+    <text x="659" y="30" text-anchor="middle" class="num">04</text>
+    <text x="659" y="75" text-anchor="middle" class="step" fill="#34d399">Score</text>
+    <text x="659" y="95" text-anchor="middle" class="detail">5 signal categories</text>
+    <text x="659" y="110" text-anchor="middle" class="detail">hard filters</text>
+    <text x="659" y="125" text-anchor="middle" class="detail">0–100 conviction</text>
+    <text x="659" y="145" text-anchor="middle" class="detail" fill="#34d399" opacity="0.5">TRADE or SKIP</text>
+
+    <line x1="739" y1="100" x2="759" y2="100" stroke="#34d399" stroke-width="1.5" stroke-opacity="0.5"/>
+    <polygon points="759,96 767,100 759,104" fill="#34d399" opacity="0.5"/>
+
+    <!-- Execute -->
+    <rect x="772" y="40" width="110" height="120" rx="6" fill="#18181b" stroke="#27272a"/>
+    <text x="827" y="30" text-anchor="middle" class="num">05</text>
+    <text x="827" y="75" text-anchor="middle" class="step">Execute</text>
+    <text x="827" y="95" text-anchor="middle" class="detail">TP / SL</text>
+    <text x="827" y="110" text-anchor="middle" class="detail">trailing stop</text>
+    <text x="827" y="125" text-anchor="middle" class="detail">timeout exit</text>
+    <text x="827" y="145" text-anchor="middle" class="detail" fill="#f59e0b" opacity="0.5">paper or live</text>
+  </g>
+
+  <!-- Bottom label -->
+  <text x="450" y="190" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" fill="#3f3f46" letter-spacing="2">DISCOVER → ENRICH → VERIFY → SCORE → EXECUTE</text>
+</svg>

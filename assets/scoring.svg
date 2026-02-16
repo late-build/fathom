@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320" width="900" height="320">
+  <style>
+    text { font-family: 'JetBrains Mono', 'SF Mono', monospace; }
+    .title { font-size: 11px; fill: #a1a1aa; font-weight: 600; letter-spacing: 1.5px; }
+    .cat { font-size: 12px; fill: #d4d4d8; font-weight: 500; }
+    .range { font-size: 10px; fill: #34d399; opacity: 0.7; }
+    .signal { font-size: 9px; fill: #71717a; }
+    .box { fill: #18181b; stroke: #27272a; stroke-width: 1; rx: 6; }
+  </style>
+
+  <rect width="900" height="320" fill="#0a0a0b" rx="8"/>
+  <text x="450" y="28" text-anchor="middle" class="title">MULTI-FACTOR SCORING MODEL — BASELINE 50, CLAMPED 0–100</text>
+
+  <!-- 5 category columns -->
+  <!-- Momentum -->
+  <rect x="25" y="48" width="160" height="220" class="box"/>
+  <rect x="25" y="48" width="160" height="4" rx="2" fill="#34d399" opacity="0.5"/>
+  <text x="105" y="75" text-anchor="middle" class="cat">Momentum</text>
+  <text x="105" y="92" text-anchor="middle" class="range">±28 pts</text>
+  <text x="40" y="115" class="signal">Buy/sell ratio 1h</text>
+  <text x="40" y="132" class="signal">Price change 5m</text>
+  <text x="40" y="149" class="signal">Price change 1h</text>
+  <line x1="40" y1="165" x2="170" y2="165" stroke="#27272a" stroke-width="0.5"/>
+  <text x="40" y="182" class="signal" fill="#34d399" opacity="0.5">&gt;60% buys → +10</text>
+  <text x="40" y="197" class="signal" fill="#34d399" opacity="0.5">&gt;10% 5m → +8</text>
+  <text x="40" y="212" class="signal" fill="#f87171" opacity="0.5">&lt;40% buys → -15</text>
+  <text x="40" y="227" class="signal" fill="#f87171" opacity="0.5">&lt;-10% 5m → -10</text>
+
+  <!-- Activity -->
+  <rect x="200" y="48" width="160" height="220" class="box"/>
+  <rect x="200" y="48" width="160" height="4" rx="2" fill="#34d399" opacity="0.4"/>
+  <text x="280" y="75" text-anchor="middle" class="cat">Activity</text>
+  <text x="280" y="92" text-anchor="middle" class="range">±18 pts</text>
+  <text x="215" y="115" class="signal">24h transaction count</text>
+  <line x1="215" y1="131" x2="345" y2="131" stroke="#27272a" stroke-width="0.5"/>
+  <text x="215" y="148" class="signal" fill="#34d399" opacity="0.5">&gt;10K txns → +8</text>
+  <text x="215" y="163" class="signal" fill="#34d399" opacity="0.5">&gt;5K txns → +5</text>
+  <text x="215" y="178" class="signal" fill="#f87171" opacity="0.5">&lt;500 txns → -10</text>
+
+  <!-- On-Chain -->
+  <rect x="375" y="48" width="160" height="220" class="box"/>
+  <rect x="375" y="48" width="160" height="4" rx="2" fill="#34d399" opacity="0.6"/>
+  <text x="455" y="75" text-anchor="middle" class="cat">On-Chain</text>
+  <text x="455" y="92" text-anchor="middle" class="range">±55 pts</text>
+  <text x="390" y="115" class="signal">Top 10 holder %</text>
+  <text x="390" y="132" class="signal">Dev holdings %</text>
+  <text x="390" y="149" class="signal">Sniper count</text>
+  <text x="390" y="166" class="signal">Holder count</text>
+  <line x1="390" y1="180" x2="520" y2="180" stroke="#27272a" stroke-width="0.5"/>
+  <text x="390" y="197" class="signal" fill="#f87171" opacity="0.5">&gt;80% top10 → -25</text>
+  <text x="390" y="212" class="signal" fill="#f87171" opacity="0.5">&gt;10% dev → -15</text>
+  <text x="390" y="227" class="signal" fill="#f87171" opacity="0.5">&gt;20 snipers → -10</text>
+
+  <!-- Liquidity -->
+  <rect x="550" y="48" width="160" height="220" class="box"/>
+  <rect x="550" y="48" width="160" height="4" rx="2" fill="#34d399" opacity="0.5"/>
+  <text x="630" y="75" text-anchor="middle" class="cat">Liquidity</text>
+  <text x="630" y="92" text-anchor="middle" class="range">±50 pts</text>
+  <text x="565" y="115" class="signal">MCap/Liq ratio</text>
+  <text x="565" y="132" class="signal">Absolute liquidity</text>
+  <line x1="565" y1="148" x2="695" y2="148" stroke="#27272a" stroke-width="0.5"/>
+  <text x="565" y="165" class="signal" fill="#f87171" opacity="0.5">&gt;100:1 ratio → -25</text>
+  <text x="565" y="180" class="signal" fill="#f87171" opacity="0.5">&lt;$3K liq → -20</text>
+  <text x="565" y="195" class="signal" fill="#34d399" opacity="0.5">&lt;10:1 ratio → +5</text>
+  <text x="565" y="210" class="signal" fill="#34d399" opacity="0.5">&gt;$50K liq → +5</text>
+
+  <!-- Freshness -->
+  <rect x="725" y="48" width="155" height="220" class="box"/>
+  <rect x="725" y="48" width="155" height="4" rx="2" fill="#34d399" opacity="0.3"/>
+  <text x="802" y="75" text-anchor="middle" class="cat">Freshness</text>
+  <text x="802" y="92" text-anchor="middle" class="range">±20 pts</text>
+  <text x="740" y="115" class="signal">Time since event</text>
+  <line x1="740" y1="131" x2="865" y2="131" stroke="#27272a" stroke-width="0.5"/>
+  <text x="740" y="148" class="signal" fill="#34d399" opacity="0.5">&lt;10m → +10</text>
+  <text x="740" y="163" class="signal" fill="#34d399" opacity="0.5">&lt;30m → +5</text>
+  <text x="740" y="178" class="signal" fill="#f87171" opacity="0.5">&gt;2h → -10</text>
+
+  <!-- Hard filters bar -->
+  <rect x="25" y="280" width="855" height="30" rx="4" fill="#18181b" stroke="#f87171" stroke-width="0.5" stroke-opacity="0.3"/>
+  <text x="40" y="299" font-family="'JetBrains Mono', monospace" font-size="10" fill="#f87171" opacity="0.6">HARD FILTERS</text>
+  <text x="160" y="299" font-family="'JetBrains Mono', monospace" font-size="9" fill="#71717a">liq &lt; $3K  ·  ratio &gt; 200:1  ·  top holders &gt; 90%  ·  no price data  →  auto SKIP regardless of score</text>
+</svg>

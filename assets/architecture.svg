@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" width="900" height="520">
+  <style>
+    text { font-family: 'JetBrains Mono', 'SF Mono', monospace; }
+    .title { font-size: 11px; fill: #a1a1aa; font-weight: 600; letter-spacing: 1.5px; }
+    .label { font-size: 11px; fill: #d4d4d8; }
+    .sublabel { font-size: 9px; fill: #71717a; }
+    .box { fill: #18181b; stroke: #27272a; stroke-width: 1; rx: 6; }
+    .box-accent { fill: #18181b; stroke: #34d399; stroke-width: 1; stroke-opacity: 0.3; rx: 6; }
+    .arrow { stroke: #3f3f46; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+    .arrow-accent { stroke: #34d399; stroke-width: 1.5; stroke-opacity: 0.5; fill: none; marker-end: url(#arrowgreen); }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3f3f46"/>
+    </marker>
+    <marker id="arrowgreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#34d399" opacity="0.5"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="520" fill="#0a0a0b" rx="8"/>
+
+  <text x="450" y="30" text-anchor="middle" class="title">FATHOM — DATA PIPELINE ARCHITECTURE</text>
+
+  <!-- Layer 1: Discovery -->
+  <rect x="30" y="55" width="840" height="75" class="box" rx="8"/>
+  <text x="50" y="75" class="sublabel" fill="#34d399" opacity="0.6">// discovery</text>
+  <rect x="50" y="85" width="120" height="32" class="box-accent"/>
+  <text x="110" y="105" text-anchor="middle" class="label">DexScreener</text>
+  <rect x="190" y="85" width="100" height="32" class="box-accent"/>
+  <text x="240" y="105" text-anchor="middle" class="label">pump.fun</text>
+  <rect x="310" y="85" width="130" height="32" class="box-accent"/>
+  <text x="375" y="105" text-anchor="middle" class="label">GeckoTerminal</text>
+  <rect x="460" y="85" width="100" height="32" class="box-accent"/>
+  <text x="510" y="105" text-anchor="middle" class="label">Helius WS</text>
+  <rect x="580" y="85" width="100" height="32" class="box-accent"/>
+  <text x="630" y="105" text-anchor="middle" class="label">Jupiter</text>
+  <text x="750" y="100" class="sublabel">7 sources</text>
+  <text x="750" y="115" class="sublabel">143+ mints/scan</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="132" x2="450" y2="158" class="arrow-accent"/>
+
+  <!-- Layer 2: Enrichment -->
+  <rect x="130" y="160" width="640" height="60" class="box" rx="8"/>
+  <text x="150" y="180" class="sublabel" fill="#34d399" opacity="0.6">// enrichment</text>
+  <text x="150" y="202" class="label">DexScreener Batch API</text>
+  <text x="400" y="202" class="sublabel">price · volume · liquidity · mcap</text>
+  <text x="650" y="202" class="sublabel">30/batch</text>
+
+  <line x1="450" y1="222" x2="450" y2="248" class="arrow-accent"/>
+
+  <!-- Layer 3: On-chain Intel -->
+  <rect x="130" y="250" width="640" height="60" class="box" rx="8"/>
+  <text x="150" y="270" class="sublabel" fill="#34d399" opacity="0.6">// on-chain intelligence</text>
+  <text x="150" y="292" class="label">Solana RPC</text>
+  <text x="310" y="292" class="sublabel">top 10 holders · dev wallet · supply · concentration %</text>
+
+  <line x1="450" y1="312" x2="450" y2="338" class="arrow-accent"/>
+
+  <!-- Layer 4: Scoring -->
+  <rect x="180" y="340" width="540" height="60" class="box-accent" rx="8"/>
+  <text x="200" y="360" class="sublabel" fill="#34d399" opacity="0.6">// multi-factor scoring</text>
+  <text x="200" y="382" class="label" fill="#34d399">Momentum</text>
+  <text x="310" y="382" class="label" fill="#34d399">Activity</text>
+  <text x="410" y="382" class="label" fill="#34d399">On-Chain</text>
+  <text x="510" y="382" class="label" fill="#34d399">Liquidity</text>
+  <text x="620" y="382" class="label" fill="#34d399">Freshness</text>
+
+  <line x1="370" y1="402" x2="370" y2="428" class="arrow-accent"/>
+  <line x1="530" y1="402" x2="530" y2="428" class="arrow-accent"/>
+
+  <!-- Layer 5: Execution -->
+  <rect x="220" y="430" width="200" height="55" class="box" rx="8"/>
+  <text x="240" y="450" class="sublabel" fill="#34d399" opacity="0.6">// paper</text>
+  <text x="240" y="472" class="label">Simulated Fills</text>
+  <text x="375" y="472" class="sublabel">P&amp;L tracking</text>
+
+  <rect x="480" y="430" width="200" height="55" class="box" rx="8"/>
+  <text x="500" y="450" class="sublabel" fill="#f59e0b" opacity="0.6">// live (WIP)</text>
+  <text x="500" y="472" class="label">Jupiter v6</text>
+  <text x="595" y="472" class="sublabel">PumpSwap</text>
+
+  <!-- Score label -->
+  <text x="450" y="510" text-anchor="middle" class="sublabel">same strategy code across all modes</text>
+</svg>
