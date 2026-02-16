@@ -96,6 +96,10 @@ See `fathom.toml.example` for all options.
 - `aiohttp` (HTTP/WebSocket)
 - `tomli` (config parsing, Python < 3.11)
 
+## Acknowledgments
+
+Fathom's event-driven architecture is inspired by [nautilus_trader](https://github.com/nautechsystems/nautilus_trader) — a production-grade algorithmic trading platform by NauTech Systems. Nautilus covers traditional markets and CEXs with 200K+ lines of Rust/Python. Fathom takes the core design principles (typed events, engine/adapter/strategy separation, backtest-live parity) and rebuilds them from scratch for Solana DEX trading in ~2K lines of Python.
+
 ## Status
 
 Alpha. Core engine works. Paper trading works. Backtest works. Live execution needs wallet signing integration (`solders`).
