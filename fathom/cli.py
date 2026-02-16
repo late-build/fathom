@@ -16,6 +16,7 @@ import asyncio
 import json
 import logging
 import sys
+import time
 from pathlib import Path
 
 from fathom.config import FathomConfig, load_config
@@ -53,6 +54,13 @@ def main() -> None:
         help="Strategy to backtest",
     )
 
+    # -- collect --
+    c_p = sub.add_parser("collect", help="Collect historical graduation data")
+    c_p.add_argument("--hours", type=float, default=24, help="Hours to look back")
+    c_p.add_argument("--output", "-o", default="graduations.json", help="Output file")
+    c_p.add_argument("--helius-key", default="", help="Helius API key (optional)")
+    c_p.add_argument("--min-liquidity", type=float, default=1000, help="Min liquidity USD")
+
     # -- quote --
     q_p = sub.add_parser("quote", help="Get a Jupiter swap quote")
     q_p.add_argument("token", help="Token symbol or mint address")
@@ -87,7 +95,10 @@ def main() -> None:
         config = FathomConfig()
 
     # Dispatch
-    if args.command == "run":
+    if args.command == "collect":
+        cmd_collect(args)
+        return
+    elif args.command == "run":
         cmd_run(config, mode=args.mode)
     elif args.command == "monitor":
         cmd_monitor(config)
@@ -97,6 +108,40 @@ def main() -> None:
         asyncio.run(cmd_quote(config, token=args.token, amount=args.amount))
     elif args.command == "status":
         cmd_status(config, config_path)
+
+
+def cmd_collect(args) -> None:
+    """Collect historical graduation data."""
+    from fathom.collect import GraduationCollector, GraduationRecord
+    from dataclasses import asdict
+
+    collector = GraduationCollector(
+        helius_api_key=args.helius_key,
+        max_age_hours=args.hours,
+        min_liquidity_usd=args.min_liquidity,
+    )
+
+    records = asyncio.run(collector.collect())
+
+    output = Path(args.output)
+    data = [asdict(r) for r in records]
+    with open(output, "w") as f:
+        json.dump(data, f, indent=2)
+
+    print(f"\n💾 Saved {len(records)} records to {output}")
+
+    if records:
+        print(f"\n{'Symbol':>12} {'Price':>14} {'MCap':>12} {'Liq':>10} {'MaxGain':>10} {'MaxLoss':>10}")
+        print("-" * 74)
+        for r in sorted(records, key=lambda x: x.max_gain_pct, reverse=True)[:20]:
+            print(
+                f"{r.symbol:>12} "
+                f"${r.initial_price_usd:>12.8f} "
+                f"${r.market_cap_at_grad:>10,.0f} "
+                f"${r.liquidity_usd:>8,.0f} "
+                f"{r.max_gain_pct:>+9.1%} "
+                f"{r.max_loss_pct:>+9.1%}"
+            )
 
 
 def cmd_run(config: FathomConfig, mode: str) -> None:
