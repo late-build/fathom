@@ -230,31 +230,62 @@ class GraduationCollector:
         except Exception as e:
             logger.debug(f"Pump.fun graduated endpoint error: {e}")
 
-        # --- Source 5: GeckoTerminal PumpSwap trending pools ---
-        for gt_query_id in ["4929624", "4929617"]:  # PumpSwap trending 5h, 12h
+        # --- Source 5: GeckoTerminal (trending + PumpSwap + volume-sorted) ---
+        gt_timeout = aiohttp.ClientTimeout(total=8)
+        gt_base = "https://api.geckoterminal.com/api/v2/networks/solana"
+        gt_endpoints = [
+            (f"{gt_base}/trending_pools?page=1", "GT trending p1"),
+            (f"{gt_base}/trending_pools?page=2", "GT trending p2"),
+            (f"{gt_base}/trending_pools?page=3", "GT trending p3"),
+            (f"{gt_base}/dexes/pumpswap/pools?sort=h24_volume_usd_desc&page=1", "GT PumpSwap vol"),
+            (f"{gt_base}/pools?sort=h1_volume_usd_desc&page=1", "GT top 1h vol"),
+            (f"{gt_base}/pools?sort=h24_tx_count_desc&page=1", "GT top 24h txns"),
+        ]
+        gt_found = 0
+        for gt_url, label in gt_endpoints:
             try:
-                await asyncio.sleep(2.1)  # GT hard 30 req/min
+                await asyncio.sleep(2.1)  # GT hard 30 req/min — respect it
                 self._api_calls += 1
-                gt_url = f"https://api.geckoterminal.com/api/v2/networks/solana/dexes/pumpswap/pools?page=1&sort=h24_volume_usd_desc"
-                async with self._session.get(
-                    gt_url,
-                    timeout=aiohttp.ClientTimeout(total=8),
-                ) as resp:
+                async with self._session.get(gt_url, timeout=gt_timeout) as resp:
                     if resp.status == 200:
                         data = await resp.json()
                         pools = data.get("data", [])
                         for pool in pools:
-                            attrs = pool.get("attributes", {})
-                            rels = pool.get("relationships", {})
-                            base_token = rels.get("base_token", {}).get("data", {}).get("id", "")
+                            base_token = pool.get("relationships", {}).get("base_token", {}).get("data", {}).get("id", "")
                             mint = base_token.replace("solana_", "") if base_token else ""
                             if mint and mint not in self._seen_mints:
                                 self._seen_mints.add(mint)
                                 mints.append(mint)
-                        logger.info(f"  GeckoTerminal PumpSwap: {len(pools)} pools")
-                break  # Only need one GT call
+                                gt_found += 1
             except Exception as e:
-                logger.debug(f"GeckoTerminal error: {e}")
+                logger.debug(f"{label} error: {e}")
+        logger.info(f"  GeckoTerminal: {gt_found} new mints from {len(gt_endpoints)} endpoints")
+
+        # --- Source 6: Pump.fun top-runners (pre-graduation momentum) ---
+        try:
+            await asyncio.sleep(DEXS_DELAY)
+            self._api_calls += 1
+            headers = {"Origin": "https://pump.fun", "Accept": "application/json"}
+            async with self._session.get(
+                "https://frontend-api-v3.pump.fun/coins/top-runners",
+                headers=headers,
+                timeout=aiohttp.ClientTimeout(total=8),
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    runners = data if isinstance(data, list) else []
+                    count = 0
+                    for item in runners:
+                        # Response wraps in .coin object sometimes
+                        coin = item.get("coin", item)
+                        mint = coin.get("mint", "") or coin.get("address", "")
+                        if mint and mint not in self._seen_mints:
+                            self._seen_mints.add(mint)
+                            mints.append(mint)
+                            count += 1
+                    logger.info(f"  Pump.fun top-runners: {count} new mints")
+        except Exception as e:
+            logger.debug(f"Pump.fun top-runners error: {e}")
 
         logger.info(f"  Total unique mints discovered: {len(mints)}")
 
