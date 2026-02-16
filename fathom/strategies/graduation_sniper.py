@@ -172,6 +172,17 @@ class GraduationSniper(Strategy):
             self._filtered += 1
             logger.debug(f"SKIP {symbol}: no price data")
             return
+
+        # Market cap estimate (pump.fun tokens = 1B supply)
+        est_mcap = event.initial_price_usd * 1_000_000_000
+        if est_mcap > self.max_initial_mcap:
+            self._filtered += 1
+            logger.debug(f"SKIP {symbol}: mcap ${est_mcap:,.0f} > ${self.max_initial_mcap:,.0f}")
+            return
+        if est_mcap < self.min_initial_mcap:
+            self._filtered += 1
+            logger.debug(f"SKIP {symbol}: mcap ${est_mcap:,.0f} < ${self.min_initial_mcap:,.0f}")
+            return
         
         # -- Entry --
         

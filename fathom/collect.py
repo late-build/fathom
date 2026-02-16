@@ -207,52 +207,120 @@ class GraduationCollector:
             except Exception as e:
                 logger.debug(f"Search error for '{term}': {e}")
 
+        # --- Source 4: Pump.fun graduated endpoint (direct from pump.fun) ---
+        try:
+            await asyncio.sleep(DEXS_DELAY)
+            self._api_calls += 1
+            headers = {"Origin": "https://pump.fun", "Accept": "application/json"}
+            async with self._session.get(
+                "https://advanced-api-v2.pump.fun/coins/graduated?limit=50&offset=0",
+                headers=headers,
+                timeout=aiohttp.ClientTimeout(total=8),
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    # Response format can be list or wrapped
+                    coins = data if isinstance(data, list) else data.get("coins", data.get("data", []))
+                    for coin in coins:
+                        mint = coin.get("mint", "") or coin.get("address", "")
+                        if mint and mint not in self._seen_mints:
+                            self._seen_mints.add(mint)
+                            mints.append(mint)
+                    logger.info(f"  Pump.fun graduated: {len(coins)} tokens")
+        except Exception as e:
+            logger.debug(f"Pump.fun graduated endpoint error: {e}")
+
+        # --- Source 5: GeckoTerminal PumpSwap trending pools ---
+        for gt_query_id in ["4929624", "4929617"]:  # PumpSwap trending 5h, 12h
+            try:
+                await asyncio.sleep(2.1)  # GT hard 30 req/min
+                self._api_calls += 1
+                gt_url = f"https://api.geckoterminal.com/api/v2/networks/solana/dexes/pumpswap/pools?page=1&sort=h24_volume_usd_desc"
+                async with self._session.get(
+                    gt_url,
+                    timeout=aiohttp.ClientTimeout(total=8),
+                ) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        pools = data.get("data", [])
+                        for pool in pools:
+                            attrs = pool.get("attributes", {})
+                            rels = pool.get("relationships", {})
+                            base_token = rels.get("base_token", {}).get("data", {}).get("id", "")
+                            mint = base_token.replace("solana_", "") if base_token else ""
+                            if mint and mint not in self._seen_mints:
+                                self._seen_mints.add(mint)
+                                mints.append(mint)
+                        logger.info(f"  GeckoTerminal PumpSwap: {len(pools)} pools")
+                break  # Only need one GT call
+            except Exception as e:
+                logger.debug(f"GeckoTerminal error: {e}")
+
         logger.info(f"  Total unique mints discovered: {len(mints)}")
 
-        # --- Fetch full pair data for each mint ---
+        # --- Fetch full pair data in batches of 30 (DexScreener batch endpoint) ---
         pairs: list[dict] = []
-        sem = asyncio.Semaphore(self.max_concurrent)
+        batch_size = 30
 
-        async def fetch_mint(mint: str) -> None:
-            async with sem:
-                try:
-                    await asyncio.sleep(DEXS_DELAY)
-                    self._api_calls += 1
-                    async with self._session.get(f"{DEXS_TOKEN_URL.format(mint=mint)}") as resp:
-                        if resp.status != 200:
-                            return
-                        data = await resp.json()
-                    
-                    for pair in data.get("pairs", []):
-                        if pair.get("chainId") != "solana":
-                            continue
-                        
-                        created = pair.get("pairCreatedAt", 0)
-                        if created < cutoff_ms:
-                            continue
-                        
-                        dex = pair.get("dexId", "")
-                        liq = float(pair.get("liquidity", {}).get("usd", 0))
-                        
-                        # Only graduated tokens (on a real DEX, not still on bonding curve)
-                        is_graduated = dex in ("pumpswap", "raydium")
-                        
-                        if is_graduated and liq >= self.min_liquidity_usd:
-                            pair_addr = pair.get("pairAddress", "")
-                            if pair_addr not in self._seen_pairs:
-                                self._seen_pairs.add(pair_addr)
-                                pairs.append(pair)
-                            break  # One pair per mint is enough
-                            
-                except Exception as e:
-                    logger.debug(f"Fetch error for {mint[:8]}: {e}")
+        for i in range(0, len(mints), batch_size):
+            batch = mints[i : i + batch_size]
+            try:
+                await asyncio.sleep(DEXS_DELAY)
+                self._api_calls += 1
+                # DexScreener batch: comma-separated addresses
+                batch_str = ",".join(batch)
+                url = f"https://api.dexscreener.com/tokens/v1/solana/{batch_str}"
+                async with self._session.get(url) as resp:
+                    if resp.status != 200:
+                        # Fallback to individual fetches
+                        logger.debug(f"Batch {resp.status}, falling back to individual")
+                        for mint in batch:
+                            await asyncio.sleep(DEXS_DELAY)
+                            self._api_calls += 1
+                            async with self._session.get(f"{DEXS_TOKEN_URL.format(mint=mint)}") as r2:
+                                if r2.status == 200:
+                                    data = await r2.json()
+                                    for pair in data.get("pairs", []):
+                                        self._filter_and_add(pair, pairs, cutoff_ms)
+                        continue
 
-        await asyncio.gather(*[fetch_mint(m) for m in mints], return_exceptions=True)
+                    data = await resp.json()
+                    # Batch endpoint returns flat array of pairs
+                    pair_list = data if isinstance(data, list) else data.get("pairs", [])
+                    for pair in pair_list:
+                        self._filter_and_add(pair, pairs, cutoff_ms)
+
+            except Exception as e:
+                logger.debug(f"Batch fetch error: {e}")
 
         # Sort by creation time (newest first)
         pairs.sort(key=lambda p: p.get("pairCreatedAt", 0), reverse=True)
         logger.info(f"  Graduated pairs with >${self.min_liquidity_usd} liq: {len(pairs)}")
         return pairs
+
+    def _filter_and_add(self, pair: dict, pairs: list[dict], cutoff_ms: int) -> None:
+        """Filter a pair and add to the list if it's a valid graduation."""
+        if pair.get("chainId") != "solana":
+            return
+        created = pair.get("pairCreatedAt", 0)
+        if created < cutoff_ms:
+            return
+        dex = pair.get("dexId", "")
+        liq = float(pair.get("liquidity", {}).get("usd", 0))
+        is_graduated = dex in ("pumpswap", "raydium")
+        if is_graduated and liq >= self.min_liquidity_usd:
+            pair_addr = pair.get("pairAddress", "")
+            mint = pair.get("baseToken", {}).get("address", "")
+            if pair_addr not in self._seen_pairs and mint:
+                self._seen_pairs.add(pair_addr)
+                # Deduplicate by mint — keep highest liquidity
+                existing = next((p for p in pairs if p.get("baseToken", {}).get("address") == mint), None)
+                if existing:
+                    if liq > float(existing.get("liquidity", {}).get("usd", 0)):
+                        pairs.remove(existing)
+                        pairs.append(pair)
+                else:
+                    pairs.append(pair)
 
     async def _process_pair(self, pair: dict, sem: asyncio.Semaphore) -> None:
         """Build a GraduationRecord from a DexScreener pair dict."""
