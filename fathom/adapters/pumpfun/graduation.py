@@ -82,7 +82,7 @@ class TokenState:
 
 # -- Custom event types for graduation system --
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class GraduationEvent(Event):
     """Emitted when a token graduates from pump.fun to a DEX pool."""
     mint: str = ""
@@ -98,7 +98,7 @@ class GraduationEvent(Event):
         object.__setattr__(self, "event_type", EventType.SIGNAL)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class BondingProgressEvent(Event):
     """Emitted when a token's bonding curve makes significant progress."""
     mint: str = ""
@@ -111,7 +111,7 @@ class BondingProgressEvent(Event):
         object.__setattr__(self, "event_type", EventType.SIGNAL)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class DevActivityEvent(Event):
     """Emitted when the dev wallet makes a significant move post-graduation."""
     mint: str = ""

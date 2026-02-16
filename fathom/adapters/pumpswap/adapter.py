@@ -252,7 +252,7 @@ class PumpSwapAdapter(BaseAdapter):
         numerator = amount_after_fee * reserve_out
         denominator = reserve_in + amount_after_fee
         
-        if denominator == 0:
+        if denominator == 0 or reserve_in == 0 or reserve_out == 0:
             return 0
         
         return numerator // denominator

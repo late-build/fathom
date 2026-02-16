@@ -42,7 +42,7 @@ class EventType(Enum):
     ERROR = auto()
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Event:
     """
     Base event with nanosecond timestamp.
@@ -64,7 +64,7 @@ class Event:
         return self.timestamp_ns / 1_000_000_000
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class PriceUpdate(Event):
     """Real-time price update for a token pair."""
     token: str = ""
@@ -77,7 +77,7 @@ class PriceUpdate(Event):
             object.__setattr__(self, "event_type", EventType.PRICE_UPDATE)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Trade(Event):
     """A completed swap/trade on a DEX."""
     token_in: str = ""
@@ -93,7 +93,7 @@ class Trade(Event):
             object.__setattr__(self, "event_type", EventType.TRADE)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class OrderUpdate(Event):
     """Order state change."""
     order_id: str = ""
