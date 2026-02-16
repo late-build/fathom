@@ -457,65 +457,33 @@ class GraduationCollector:
         if not self.helius_api_key:
             return
 
-        das_url = f"https://mainnet.helius-rpc.com/?api-key={self.helius_api_key}"
-        fast_timeout = aiohttp.ClientTimeout(total=8)
+        from fathom.adapters.solana_rpc import batch_token_intel
+
+        # Build RPC list: Helius first (if key provided), then public fallbacks
+        rpcs = []
+        if self.helius_api_key:
+            rpcs.append(f"https://mainnet.helius-rpc.com/?api-key={self.helius_api_key}")
+        rpcs.extend([
+            "https://solana-rpc.publicnode.com",
+            "https://api.mainnet-beta.solana.com",
+        ])
+
+        mints = [rec.mint for rec in self._records]
+        intel_map = await batch_token_intel(mints, rpc_urls=rpcs, max_concurrent=3, delay_s=0.3)
+        self._api_calls += len(mints) * 3  # 3 RPC calls per token
 
         for rec in self._records:
-            try:
-                # 1. getAsset — fast, gives creator from authorities
-                await asyncio.sleep(HELIUS_DELAY)
-                self._api_calls += 1
-                payload = {
-                    "jsonrpc": "2.0", "id": 1,
-                    "method": "getAsset",
-                    "params": {"id": rec.mint},
-                }
-                async with self._session.post(das_url, json=payload, timeout=fast_timeout) as resp:
-                    if resp.status == 200:
-                        data = await resp.json()
-                        result = data.get("result", {})
-                        # Creator from authorities
-                        for auth in result.get("authorities", []):
-                            addr = auth.get("address", "")
-                            if addr:
-                                rec.creator = addr
-                                break
-                        # Also grab ownership info
-                        ownership = result.get("ownership", {})
-                        if not rec.creator and ownership.get("owner"):
-                            rec.creator = ownership["owner"]
-
-                # 2. Holder count via getTokenAccounts (one page, fast)
-                await asyncio.sleep(HELIUS_DELAY)
-                self._api_calls += 1
-                payload2 = {
-                    "jsonrpc": "2.0", "id": 1,
-                    "method": "getTokenAccounts",
-                    "params": {
-                        "mint": rec.mint,
-                        "limit": 1000,
-                        "showZeroBalance": False,
-                    },
-                }
-                async with self._session.post(das_url, json=payload2, timeout=fast_timeout) as resp:
-                    if resp.status == 200:
-                        data = await resp.json()
-                        result = data.get("result", {})
-                        accounts = result.get("token_accounts", [])
-                        holder_count = len(accounts)
-                        if result.get("cursor"):
-                            holder_count = max(holder_count, 1000)
-                        rec.holder_count = holder_count
-
+            intel = intel_map.get(rec.mint)
+            if intel:
+                rec.holder_count = intel.holder_count
+                rec.creator = intel.deployer
                 logger.info(
-                    f"  ✓ {rec.symbol:>10} | holders={rec.holder_count:>5} | "
-                    f"creator={rec.creator[:8] if rec.creator else 'none':>8}"
+                    f"  ✓ {rec.symbol:>10} | holders={intel.holder_count:>5} | "
+                    f"top10={intel.top10_concentration:>5.1f}% | "
+                    f"deployer={intel.deployer[:8] if intel.deployer else 'none':>8}"
                 )
-
-            except asyncio.TimeoutError:
-                logger.debug(f"Helius timeout for {rec.symbol}")
-            except Exception as e:
-                logger.debug(f"Helius enrich error for {rec.symbol}: {e}")
+            else:
+                logger.debug(f"  ✗ {rec.symbol}: no RPC data")
 
     def _compute_outcomes(self, rec: GraduationRecord) -> None:
         """Compute outcome metrics from price history."""
