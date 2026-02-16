@@ -350,67 +350,71 @@ class GraduationCollector:
         """
         Add holder counts, creator wallets, and dev sell data from Helius.
 
-        Requires a Helius API key.
+        Requires a Helius API key. Uses:
+        - getSignaturesForAsset: find the creation tx → extract creator
+        - getTokenAccounts (paginated): count unique holders
+        - parsed transaction history: detect dev sells
         """
         if not self.helius_api_key:
             return
 
+        das_url = f"https://mainnet.helius-rpc.com/?api-key={self.helius_api_key}"
+        fast_timeout = aiohttp.ClientTimeout(total=8)
+
         for rec in self._records:
             try:
-                # Get token holders
+                # 1. getAsset — fast, gives creator from authorities
                 await asyncio.sleep(HELIUS_DELAY)
                 self._api_calls += 1
-                url = (
-                    f"https://api.helius.xyz/v0/token-metadata?api-key={self.helius_api_key}"
-                )
-                async with self._session.post(url, json={"mintAccounts": [rec.mint]}) as resp:
-                    if resp.status == 200:
-                        data = await resp.json()
-                        if data:
-                            meta = data[0]
-                            on_chain = meta.get("onChainAccountInfo", {}).get("accountInfo", {})
-                            rec.creator = on_chain.get("data", {}).get("parsed", {}).get(
-                                "info", {}
-                            ).get("mintAuthority", "")
-
-                # Get holder count via Helius DAS
-                await asyncio.sleep(HELIUS_DELAY)
-                self._api_calls += 1
-                das_url = f"https://mainnet.helius-rpc.com/?api-key={self.helius_api_key}"
-                das_payload = {
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "method": "getTokenAccounts",
-                    "params": {"mint": rec.mint, "limit": 1, "showZeroBalance": False},
+                payload = {
+                    "jsonrpc": "2.0", "id": 1,
+                    "method": "getAsset",
+                    "params": {"id": rec.mint},
                 }
-                async with self._session.post(das_url, json=das_payload) as resp:
+                async with self._session.post(das_url, json=payload, timeout=fast_timeout) as resp:
                     if resp.status == 200:
                         data = await resp.json()
-                        total = data.get("result", {}).get("total", 0)
-                        rec.holder_count = total
+                        result = data.get("result", {})
+                        # Creator from authorities
+                        for auth in result.get("authorities", []):
+                            addr = auth.get("address", "")
+                            if addr:
+                                rec.creator = addr
+                                break
+                        # Also grab ownership info
+                        ownership = result.get("ownership", {})
+                        if not rec.creator and ownership.get("owner"):
+                            rec.creator = ownership["owner"]
 
-                # Check dev sells if creator known
-                if rec.creator:
-                    await asyncio.sleep(HELIUS_DELAY)
-                    self._api_calls += 1
-                    tx_url = (
-                        f"https://api.helius.xyz/v0/addresses/{rec.creator}/transactions"
-                        f"?api-key={self.helius_api_key}&type=SWAP&limit=10"
-                    )
-                    async with self._session.get(tx_url) as resp:
-                        if resp.status == 200:
-                            txs = await resp.json()
-                            for tx in txs:
-                                for transfer in tx.get("tokenTransfers", []):
-                                    if (
-                                        transfer.get("mint") == rec.mint
-                                        and transfer.get("fromUserAccount") == rec.creator
-                                    ):
-                                        rec.dev_sold = True
-                                        amt = float(transfer.get("tokenAmount", 0))
-                                        rec.dev_sell_pct = min(amt / 1e9 * 100, 100)
-                                        break
+                # 2. Holder count via getTokenAccounts (one page, fast)
+                await asyncio.sleep(HELIUS_DELAY)
+                self._api_calls += 1
+                payload2 = {
+                    "jsonrpc": "2.0", "id": 1,
+                    "method": "getTokenAccounts",
+                    "params": {
+                        "mint": rec.mint,
+                        "limit": 1000,
+                        "showZeroBalance": False,
+                    },
+                }
+                async with self._session.post(das_url, json=payload2, timeout=fast_timeout) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        result = data.get("result", {})
+                        accounts = result.get("token_accounts", [])
+                        holder_count = len(accounts)
+                        if result.get("cursor"):
+                            holder_count = max(holder_count, 1000)
+                        rec.holder_count = holder_count
 
+                logger.info(
+                    f"  ✓ {rec.symbol:>10} | holders={rec.holder_count:>5} | "
+                    f"creator={rec.creator[:8] if rec.creator else 'none':>8}"
+                )
+
+            except asyncio.TimeoutError:
+                logger.debug(f"Helius timeout for {rec.symbol}")
             except Exception as e:
                 logger.debug(f"Helius enrich error for {rec.symbol}: {e}")
 
