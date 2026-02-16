@@ -63,6 +63,14 @@ class GraduationRecord:
     price_history: list[dict] = field(default_factory=list)
     dev_sold: bool = False
     dev_sell_pct: float = 0.0
+    # Scoring model fields
+    txns_24h: int = 0
+    buys_1h: int = 0
+    sells_1h: int = 0
+    price_change_5m: float = 0.0
+    price_change_1h: float = 0.0
+    sniper_count: int = 0
+    dev_holdings_pct: float = 0.0
     # Outcome metrics (computed after collection)
     price_5m: float = 0.0
     price_15m: float = 0.0
@@ -367,6 +375,12 @@ class GraduationCollector:
                 created_ms = best.get("pairCreatedAt", 0)
                 created_s = int(created_ms / 1000) if created_ms else 0
 
+                txns = best.get("txns", {})
+                txns_24h = int(txns.get("h24", {}).get("buys", 0) or 0) + int(txns.get("h24", {}).get("sells", 0) or 0)
+                buys_1h = int(txns.get("h1", {}).get("buys", 0) or 0)
+                sells_1h = int(txns.get("h1", {}).get("sells", 0) or 0)
+                price_changes = best.get("priceChange", {})
+
                 rec = GraduationRecord(
                     mint=mint,
                     symbol=best.get("baseToken", {}).get("symbol", ""),
@@ -378,6 +392,11 @@ class GraduationCollector:
                     market_cap_at_grad=float(best.get("marketCap", 0) or 0),
                     liquidity_usd=float(best.get("liquidity", {}).get("usd", 0)),
                     fdv=float(best.get("fdv", 0) or 0),
+                    txns_24h=txns_24h,
+                    buys_1h=buys_1h,
+                    sells_1h=sells_1h,
+                    price_change_5m=float(price_changes.get("m5", 0) or 0),
+                    price_change_1h=float(price_changes.get("h1", 0) or 0),
                 )
 
                 # Build price history from DexScreener % changes

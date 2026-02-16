@@ -95,6 +95,16 @@ class GraduationEvent(Event):
     creator: str = ""
     initial_price_usd: float = 0.0
     top10_concentration: float = 0.0  # % of supply held by top 10 holders
+    # Extended fields for scoring model
+    liquidity_usd: float = 0.0
+    market_cap_usd: float = 0.0
+    txns_24h: int = 0
+    buys_1h: int = 0
+    sells_1h: int = 0
+    price_change_5m: float = 0.0
+    price_change_1h: float = 0.0
+    sniper_count: int = 0
+    dev_holdings_pct: float = 0.0
 
 
 @dataclass(frozen=True)

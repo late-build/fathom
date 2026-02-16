@@ -116,6 +116,15 @@ class BacktestRunner:
                 creator=record.get("creator", ""),
                 initial_price_usd=record.get("initial_price_usd", 0),
                 top10_concentration=record.get("top10_concentration", 0),
+                liquidity_usd=record.get("liquidity_usd", 0),
+                market_cap_usd=record.get("market_cap_at_grad", 0),
+                txns_24h=record.get("txns_24h", 0),
+                buys_1h=record.get("buys_1h", 0),
+                sells_1h=record.get("sells_1h", 0),
+                price_change_5m=record.get("price_change_5m", 0),
+                price_change_1h=record.get("price_change_1h", 0),
+                sniper_count=record.get("sniper_count", 0),
+                dev_holdings_pct=record.get("dev_holdings_pct", 0),
             )
             self.event_bus.publish(grad)
 
