@@ -54,6 +54,7 @@ class GraduationRecord:
     sol_raised: float = 0.0
     holder_count: int = 0
     creator: str = ""
+    top10_concentration: float = 0.0  # % of supply held by top 10
     pool_address: str = ""
     pool_type: str = ""
     market_cap_at_grad: float = 0.0
@@ -477,6 +478,7 @@ class GraduationCollector:
             if intel:
                 rec.holder_count = intel.holder_count
                 rec.creator = intel.deployer
+                rec.top10_concentration = intel.top10_concentration
                 logger.info(
                     f"  ✓ {rec.symbol:>10} | holders={intel.holder_count:>5} | "
                     f"top10={intel.top10_concentration:>5.1f}% | "

@@ -75,6 +75,7 @@ class GraduationSniper(Strategy):
         exit_on_dev_sell: Auto-exit if dev dumps
         min_initial_mcap: Minimum market cap at graduation
         max_initial_mcap: Maximum market cap at graduation
+        max_top10_concentration: Skip if top 10 holders own more than this %
     """
     
     name = "graduation_sniper"
@@ -94,6 +95,7 @@ class GraduationSniper(Strategy):
         exit_on_dev_sell: bool = True,
         min_initial_mcap: float = 0.0,
         max_initial_mcap: float = 500_000.0,  # 500K max
+        max_top10_concentration: float = 80.0,  # skip if top 10 hold >80%
     ) -> None:
         super().__init__()
         self.position_size_usd = position_size_usd
@@ -109,6 +111,7 @@ class GraduationSniper(Strategy):
         self.exit_on_dev_sell = exit_on_dev_sell
         self.min_initial_mcap = min_initial_mcap
         self.max_initial_mcap = max_initial_mcap
+        self.max_top10_concentration = max_top10_concentration
         
         self._positions: dict[str, Position] = {}
         self._passed: int = 0
@@ -183,7 +186,13 @@ class GraduationSniper(Strategy):
             self._filtered += 1
             logger.debug(f"SKIP {symbol}: mcap ${est_mcap:,.0f} < ${self.min_initial_mcap:,.0f}")
             return
-        
+
+        # Top 10 holder concentration (0 = data unavailable, skip check)
+        if event.top10_concentration > 0 and event.top10_concentration > self.max_top10_concentration:
+            self._filtered += 1
+            logger.debug(f"SKIP {symbol}: top10 hold {event.top10_concentration:.1f}% > {self.max_top10_concentration:.0f}%")
+            return
+
         # -- Entry --
         
         self._passed += 1

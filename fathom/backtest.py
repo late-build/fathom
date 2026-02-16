@@ -115,6 +115,7 @@ class BacktestRunner:
                 holder_count=record.get("holder_count", 0),
                 creator=record.get("creator", ""),
                 initial_price_usd=record.get("initial_price_usd", 0),
+                top10_concentration=record.get("top10_concentration", 0),
             )
             self.event_bus.publish(grad)
 

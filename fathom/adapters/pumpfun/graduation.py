@@ -94,6 +94,7 @@ class GraduationEvent(Event):
     holder_count: int = 0
     creator: str = ""
     initial_price_usd: float = 0.0
+    top10_concentration: float = 0.0  # % of supply held by top 10 holders
 
 
 @dataclass(frozen=True)
