@@ -15,7 +15,6 @@
 | Linux (x86_64) | 3.9+ | ✓ |
 | macOS (ARM64) | 3.9+ | ✓ |
 
-- **Website**: [fathom-site.vercel.app](https://fathom-site.vercel.app)
 - **Source**: [github.com/late-build/fathom](https://github.com/late-build/fathom)
 
 ## Introduction
@@ -49,18 +48,6 @@ Thousands of tokens launch daily. Most are noise. The alpha isn't in finding tok
 - **Historical backtesting**: Replay collected graduation data through any strategy. Win rate, P&L, drawdown metrics.
 - **Adaptive rate limiting**: DexScreener batch API with exponential backoff. GeckoTerminal 30 req/min compliance. Pump.fun origin header handling.
 - **CLI-first**: `python -m fathom collect|backtest|run|monitor|quote|status` — no web UI, no setup wizards.
-
-## Web App
-
-The companion site at [fathom-site.vercel.app](https://fathom-site.vercel.app) is a 7-page interactive app — not a brochure:
-
-- **Token Analyzer** — paste any mint, get a full scoring breakdown with sparkline chart
-- **Strategy Sandbox** — backtest single tokens or the full dataset with live slider controls
-- **Leaderboard** — wallet-verified strategy submissions, ranked by performance, forkable
-- **Live Feed** — real-time tokens scored by the multi-factor model
-- **Tokenomics** — $FATHOM supply model, treasury, staking roadmap
-
-Source: [late-build/fathom-site](https://github.com/late-build/fathom-site)
 
 ## Architecture
 

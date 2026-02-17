@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5eead4"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+  </defs>
+  <circle cx="256" cy="256" r="256" fill="#0a0a0b"/>
+  <!-- Bold "f" letterform — chunky, geometric, fills the space -->
+  <!-- Top bar -->
+  <rect x="160" y="120" width="220" height="40" rx="6" fill="url(#g1)"/>
+  <!-- Middle bar -->
+  <rect x="130" y="240" width="200" height="36" rx="6" fill="url(#g1)"/>
+  <!-- Vertical stem -->
+  <rect x="160" y="120" width="44" height="280" rx="6" fill="url(#g1)"/>
+</svg>

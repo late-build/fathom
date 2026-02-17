@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5eead4"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+  </defs>
+  <!-- Dark circle bg -->
+  <circle cx="256" cy="256" r="256" fill="#0a0a0b"/>
+  <!-- Bold plumb/anchor mark — thick, reads at any size -->
+  <!-- Crossbar -->
+  <rect x="120" y="128" width="272" height="28" rx="14" fill="url(#g1)"/>
+  <!-- Vertical shaft -->
+  <rect x="234" y="128" width="44" height="240" rx="8" fill="url(#g1)"/>
+  <!-- Plumb weight (diamond) -->
+  <polygon points="256,360 216,400 256,440 296,400" fill="url(#g1)"/>
+</svg>
